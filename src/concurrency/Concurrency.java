@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import concurrency.Population;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -22,42 +23,28 @@ import java.util.concurrent.LinkedBlockingDeque;
  *
  * @author Rob
  */
-public class Concurrency
+public class Concurrency implements Runnable
 {
 
 	/**
 	 * @param args the command line arguments
 	 */
+	@SuppressWarnings("empty-statement")
 	public static void main(String[] args) throws IOException
 	{
-		ArrayList<Population> transList = new ArrayList<>();
-		String fileIn = "assets/population2016CSO.csv";
 
-		String line = null;
-//            Population transaction = new Population();
+		Object DataSource = locateFile();
+		ArrayList<Concurrency> runnerList = new ArrayList<Concurrency>();
+		String[] counties = null;
 
-		FileReader fileReader = new FileReader(fileIn);
-		BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-		while ((line = bufferedReader.readLine()) != null)
+		for (String county : counties)
 		{
-
-			String[] temp = line.split(",");
-			String sex = temp[0];
-			String age = temp[1];
-			String county = temp[2];
-			String population = temp[3];
-			//transList.add(new Population(sex, age, county, population));
-			
-			System.out.println("sex " + sex);
-			System.out.println("age  " + age);
-			System.out.println("county  " + county);
-			System.out.println("population  " + population);
+			Concurrency runner = Build(county, DataSource);
+			runnerList.add(runner);
+			runner.run();
 
 		}
-		bufferedReader.close();
-		//System.out.println(transList);
-	
+
 //	boolean data = true;
 //		String text = "";
 //		try
@@ -94,10 +81,7 @@ public class Concurrency
 //		{
 //
 //		}
-		
-		
-		
-	Scanner s = new Scanner(System.in);
+		Scanner s = new Scanner(System.in);
 
 //       
 		int option = 0;
@@ -107,7 +91,7 @@ public class Concurrency
 			System.out.println("2. Time in milliseconds it takes to complete the above concurrent task.");
 			System.out.println("3. Calculate and display the population of Ireland based on the information returned form the concurrent tasks above");
 			System.out.println("4. ");
-			
+
 			option = s.nextInt();
 			switch (option)
 			{
@@ -123,22 +107,78 @@ public class Concurrency
 					break;
 
 				case 2:
-					
+
 					break;
 
 				case 3:
-					
+
 					break;
 
 				case 4:
-					
-					break;
 
-			
+					break;
 
 			}
 
 		} while (option != 4);
 	}
-	
+
+	private static ArrayList<Population> locateFile() throws FileNotFoundException, IOException
+	{
+		ArrayList<Population> trendList = new ArrayList<>();
+		String fileIn = "assets/population2016CSO.csv";
+
+		String line = null;
+//            Population transaction = new Population();
+
+		FileReader fileReader = new FileReader(fileIn);
+		BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+		while ((line = bufferedReader.readLine()) != null)
+		{
+
+			String[] temp = line.split(",");
+			String sex = temp[0];
+			String age = temp[1];
+			String county = temp[2];
+			String population = temp[3];
+			trendList.add(new Population(sex, age, county, Integer.parseInt(population)));
+
+//			System.out.println("sex " + sex);
+//			System.out.println("age  " + age);
+//			System.out.println("county  " + county);
+//			System.out.println("population  " + population);
+		}
+		bufferedReader.close();
+		return trendList;
+//System.out.println(transList);
+	}
+
+	private static Concurrency Build(String county, Object DataSource)
+	{
+		Concurrency runnable = new Concurrency();
+		runnable.DataSource = DataSource;
+		runnable.searchCounty = county;
+
+		return runnable;
+	}
+
+	String searchCounty;
+	Object DataSource;
+	long timeTaken = 0;
+
+	@Override
+	public void run()
+	{
+		long start = System.nanoTime();
+		int total = 0;
+		//
+		//	going throught the file
+		//
+		System.out.println(searchCounty + " " + total);
+		timeTaken = System.nanoTime() - start;
+		System.out.printf("Task took %.3f ms to run%n", timeTaken / 1e6);
+
+	}
+
 }

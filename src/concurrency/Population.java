@@ -24,6 +24,14 @@ public class Population
 		this.population = population;
 	}
 
+	Population(String sex, String age, String county, String population)
+	{
+		this.sex= sex;
+		this.age= age;
+		this.county = county;
+		this.population = Integer.parseInt(population);
+	}
+
 	/**
 	 * @return the sex
 	 */
