@@ -19,6 +19,9 @@ import java.util.Scanner;
 public class Concurrency implements Runnable
 {
 
+	public final static int ExitCode = 4;
+	public final static int PrintCountiesCode = 5;
+
 	/**
 	 * @param args the command line arguments
 	 * @throws java.io.IOException
@@ -26,12 +29,12 @@ public class Concurrency implements Runnable
 	@SuppressWarnings("empty-statement")
 	public static void main(String[] args) throws IOException
 	{
+		ArrayList<String> counties = new ArrayList<String>();
 
-		Object DataSource = locateFile();
+		Object DataSource = locateFile(counties);
 		ArrayList<Concurrency> runnerList = new ArrayList<>();
-		String[] counties = {"test1 ", "test2 "} ;
 
-		for (String county : counties)
+		for(String county : counties)
 		{
 			Concurrency runner = Build(county, DataSource);
 			runnerList.add(runner);
@@ -59,7 +62,7 @@ public class Concurrency implements Runnable
 //					{
 //						Object object = (Object) objectInputStream.readObject();
 //
-//						
+//
 //
 //					} catch (EOFException end)
 //					{
@@ -77,7 +80,7 @@ public class Concurrency implements Runnable
 //		}
 		Scanner s = new Scanner(System.in);
 
-//       
+//
 		int option = 0;
 		do
 		{
@@ -87,7 +90,7 @@ public class Concurrency implements Runnable
 			System.out.println("4. ");
 
 			option = s.nextInt();
-			switch (option)
+			switch(option)
 			{
 				case 1:
 //					BlockingDeque<String> deque = new LinkedBlockingDeque<String>();
@@ -96,7 +99,7 @@ public class Concurrency implements Runnable
 //
 //				String two = deque.takeLast("population");
 //				String one = deque.takeFirst();
-//		
+//
 
 					break;
 
@@ -108,16 +111,24 @@ public class Concurrency implements Runnable
 
 					break;
 
-				case 4:
+				case PrintCountiesCode:
+					for(String county : counties)
+					{
+						System.out.println(county);
+
+					}
+					break;
+				case ExitCode:
 
 					break;
 
 			}
 
-		} while (option != 4);
+		}
+		while(option != ExitCode);
 	}
 
-	private static ArrayList<Population> locateFile() throws FileNotFoundException, IOException
+	private static ArrayList<Population> locateFile(ArrayList<String> counties) throws FileNotFoundException, IOException
 	{
 		ArrayList<Population> trendList = new ArrayList<>();
 		String fileIn = "assets/population2016CSO.csv";
@@ -128,7 +139,7 @@ public class Concurrency implements Runnable
 		FileReader fileReader = new FileReader(fileIn);
 		BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-		while ((line = bufferedReader.readLine()) != null)
+		while((line = bufferedReader.readLine()) != null)
 		{
 
 			String[] temp = line.split(",");
@@ -138,6 +149,10 @@ public class Concurrency implements Runnable
 			String population = temp[3];
 			trendList.add(new Population(sex, age, county, Integer.parseInt(population)));
 
+			if(!counties.contains(county))
+			{
+				counties.add(county);
+			}
 //			System.out.println("sex " + sex);
 //			System.out.println("age  " + age);
 //			System.out.println("county  " + county);
@@ -174,5 +189,4 @@ public class Concurrency implements Runnable
 		System.out.printf("Task took %.3f ms to run%n", timeTaken / 1e6);
 
 	}
-
 }
