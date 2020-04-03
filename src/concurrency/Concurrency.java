@@ -6,18 +6,11 @@
 package concurrency;
 
 import java.io.BufferedReader;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import concurrency.Population;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  *
@@ -28,14 +21,15 @@ public class Concurrency implements Runnable
 
 	/**
 	 * @param args the command line arguments
+	 * @throws java.io.IOException
 	 */
 	@SuppressWarnings("empty-statement")
 	public static void main(String[] args) throws IOException
 	{
 
 		Object DataSource = locateFile();
-		ArrayList<Concurrency> runnerList = new ArrayList<Concurrency>();
-		String[] counties = null;
+		ArrayList<Concurrency> runnerList = new ArrayList<>();
+		String[] counties = {"test1 ", "test2 "} ;
 
 		for (String county : counties)
 		{
@@ -151,7 +145,7 @@ public class Concurrency implements Runnable
 		}
 		bufferedReader.close();
 		return trendList;
-//System.out.println(transList);
+
 	}
 
 	private static Concurrency Build(String county, Object DataSource)
