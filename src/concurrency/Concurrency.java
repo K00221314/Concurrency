@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package concurrency;
 
 import java.io.BufferedReader;
@@ -10,17 +5,22 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Scanner;
 
 /**
- *
  * @author Rob
  */
-public class Concurrency implements Runnable
+public class Concurrency
 {
 
-	public final static int ExitCode = 4;
-	public final static int PrintCountiesCode = 5;
+	public final static int ExitCode = 5;
+	public final static int GetTotalPopulationCode = 3;
+	//public final static int PrintCountiesCode = 5;
+	public final static int LocationPopulation = 1;
+	public final static int AverageReturnDataCode = 4;
+	public final static int PrintTaskTimesCode = 2;
 
 	/**
 	 * @param args the command line arguments
@@ -29,164 +29,151 @@ public class Concurrency implements Runnable
 	@SuppressWarnings("empty-statement")
 	public static void main(String[] args) throws IOException
 	{
-		ArrayList<String> counties = new ArrayList<String>();
+		String filePath = "assets/population2016CSO.csv";
 
-		Object DataSource = locateFile(counties);
-		ArrayList<Concurrency> runnerList = new ArrayList<>();
+		ArrayList<String> counties = new ArrayList<>();
 
-		for(String county : counties)
+		ArrayList<PopulationDataRecord> DataSource = ParseFile(filePath, counties);
+		ArrayList<LocationPopulationCountingTask> populationTaskList = new ArrayList<>();
+
+		for (String county : counties)
 		{
-			Concurrency runner = Build(county, DataSource);
-			runnerList.add(runner);
-			runner.run();
+			LocationPopulationCountingTask locationPopulationCountingTask = Build(county, DataSource);
+			populationTaskList.add(locationPopulationCountingTask);
+			locationPopulationCountingTask.run();
 
 		}
-
-//	boolean data = true;
-//		String text = "";
-//		try
-//		{
-//			File file = new File("assets/population2016CSO.csv");
-//
-//			if (!file.exists())
-//			{
-//				System.out.println("cannot find file");
-//			} else
-//			{
-//				FileInputStream fileInputStream = new FileInputStream(file);
-//				ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-//
-//				while (data)
-//				{
-//					try
-//					{
-//						Object object = (Object) objectInputStream.readObject();
-//
-//
-//
-//					} catch (EOFException end)
-//					{
-//						data = false;
-//					}
-//
-//				}
-//			}
-//		} catch (Exception ex)
-//		{
-//			System.out.println("Problem reading from file" + ex);
-//		}
-//		{
-//
-//		}
-		Scanner s = new Scanner(System.in);
+		Scanner keyboardScanner = new Scanner(System.in);
 
 //
-		int option = 0;
+		int userMenuSelection = 0;
 		do
 		{
-			System.out.println("1. Total population for each area regardless of age");
-			System.out.println("2. Time in milliseconds it takes to complete the above concurrent task.");
-			System.out.println("3. Calculate and display the population of Ireland based on the information returned form the concurrent tasks above");
-			System.out.println("4. ");
+			PrintMenu();
 
-			option = s.nextInt();
-			switch(option)
+			userMenuSelection = keyboardScanner.nextInt();
+			switch (userMenuSelection)
 			{
-				case 1:
-//					BlockingDeque<String> deque = new LinkedBlockingDeque<String>();
-//					deque.addFirst("population");
-//					deque.addLast("age");
-//
-//				String two = deque.takeLast("population");
-//				String one = deque.takeFirst();
-//
+				case LocationPopulation:
 
 					break;
 
-				case 2:
-
+				case AverageReturnDataCode:
+					AverageReturnData(populationTaskList);
 					break;
 
-				case 3:
-
-					break;
-
-				case PrintCountiesCode:
-					for(String county : counties)
+				case PrintTaskTimesCode:
+					for (LocationPopulationCountingTask task : populationTaskList)
 					{
-						System.out.println(county);
-
+						System.out.println(task.toString());
 					}
 					break;
-				case ExitCode:
 
+				case GetTotalPopulationCode:
+					GetTotalPopulation(populationTaskList);
 					break;
 
+//				case PrintCountiesCode:
+//					System.out.println(counties.size());
+//					for (String county : counties)
+//					{
+//						System.out.println(county);
+//					}
+//					break;
+				case ExitCode:
+					System.out.println("Goodbye");
+					break;
 			}
-
-		}
-		while(option != ExitCode);
+		} while (userMenuSelection != ExitCode);
 	}
 
-	private static ArrayList<Population> locateFile(ArrayList<String> counties) throws FileNotFoundException, IOException
+	private static void PrintMenu()
 	{
-		ArrayList<Population> trendList = new ArrayList<>();
-		String fileIn = "assets/population2016CSO.csv";
+		//System.out.println(LocationPopulation + ". Total population for each area regardless of age.");
+		//System.out.println(PrintTaskTimesCode + ". Time in milliseconds it takes to complete the above concurrent task.");
+		System.out.println(GetTotalPopulationCode + ". Calculate and display the population of Ireland.");
+		System.out.println(AverageReturnDataCode + ". Average first and last county to return data.");
+		System.out.println(ExitCode + ". Exit Application");
+	}
 
-		String line = null;
-//            Population transaction = new Population();
+	private static LocationPopulationCountingTask Build(String county, ArrayList<PopulationDataRecord> DataSource)
+	{
+		LocationPopulationCountingTask populationTask = new LocationPopulationCountingTask();
+		populationTask.DataSource = DataSource;
+		populationTask.searchCounty = county;
 
-		FileReader fileReader = new FileReader(fileIn);
+		return populationTask;
+	}
+
+	private static ArrayList<PopulationDataRecord> ParseFile(String filePath, ArrayList<String> counties) throws FileNotFoundException, IOException
+	{
+		ArrayList<PopulationDataRecord> trendList = new ArrayList<>();
+
+		FileReader fileReader = new FileReader(filePath);
 		BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-		while((line = bufferedReader.readLine()) != null)
+		String line;
+		while ((line = bufferedReader.readLine()) != null)
 		{
-
 			String[] temp = line.split(",");
 			String sex = temp[0];
-			String age = temp[1];
+			String ageRange = temp[1];
 			String county = temp[2];
 			String population = temp[3];
-			trendList.add(new Population(sex, age, county, Integer.parseInt(population)));
+			trendList.add(new PopulationDataRecord(sex, ageRange, county, Integer.parseInt(population)));
 
-			if(!counties.contains(county))
+			if (!counties.contains(county))
 			{
 				counties.add(county);
 			}
-//			System.out.println("sex " + sex);
-//			System.out.println("age  " + age);
-//			System.out.println("county  " + county);
-//			System.out.println("population  " + population);
 		}
 		bufferedReader.close();
 		return trendList;
 
 	}
 
-	private static Concurrency Build(String county, Object DataSource)
+	private static void GetTotalPopulation(ArrayList<LocationPopulationCountingTask> populationTaskList)
 	{
-		Concurrency runnable = new Concurrency();
-		runnable.DataSource = DataSource;
-		runnable.searchCounty = county;
-
-		return runnable;
-	}
-
-	String searchCounty;
-	Object DataSource;
-	long timeTaken = 0;
-
-	@Override
-	public void run()
-	{
-		long start = System.nanoTime();
 		int total = 0;
-		//
-		//	going throught the file
-		//
-		System.out.println(searchCounty + " " + total);
-		timeTaken = System.nanoTime() - start;
-		System.out.printf("Task took %.3f ms to run%n", timeTaken / 1e6);
-
+		for (LocationPopulationCountingTask task : populationTaskList)
+		{
+			total += task.total;
+		}
+		System.out.println("Total Population:" + total);
 	}
+
+	private static void AverageReturnData(ArrayList<LocationPopulationCountingTask> populationTaskList)
+	{
+		final int times = 10;
+		String[] winner = new String[times];
+		String[] loser = new String[times];
+		for (int i = 0; i < times; i++)
+		{
+//Future<>
+
+			//Arrays.sort(winner, Comparator.comparingInt(String::length));
+//			System.out.println("Last element is: "
+//                               + populationTaskList.get(populationTaskList.size() - 1)); 
+			//winner = populationTaskList[0];
+			winner[i] = populationTaskList.get(0).searchCounty;
+			loser[i] = populationTaskList.get(populationTaskList.size() - 1).searchCounty;
+
+			for (LocationPopulationCountingTask task : populationTaskList)
+			{
+
+				task.run();
+				System.out.println(task.toString());
+				System.out.println("First element is: " + winner[i]);
+				System.out.println("Last element is: " + loser[i]);
+			}
+
+			//		populationTaskList. sort list by endtime
+			//java67.com/2015/06/how-to-get-first-and-last-elements-form-ArrayList-java.html
+			//https://stackoverflow.com/questions/21970719/java-arrays-sort-with-lambda-expression
+			//winner[i]=populationTaskList.first().searchCounty;
+			//loser[i]]=populationTaskList.last().searchCounty;;
+			//
+		}
+	}
+
 }
